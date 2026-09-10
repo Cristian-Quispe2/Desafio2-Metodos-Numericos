@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desafío Integrador Financiero - Métodos Numéricos</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #17202a;
+      }
+      header {
+        background: #182a3a;
+        color: white;
+        padding: 28px 20px;
+        text-align: center;
+      }
+      header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      header p {
+        margin: 0;
+        color: #dce6ef;
+      }
+      .container {
+        max-width: 1150px;
+        margin: 25px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 18px;
+        box-shadow: 0 3px 12px #0001;
+      }
+      h2 {
+        margin-top: 0;
+        color: #182a3a;
+      }
+      h3 {
+        color: #34495e;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccd3da;
+        border-radius: 7px;
+        font-size: 15px;
+      }
+      button {
+        border: 0;
+        border-radius: 8px;
+        padding: 11px 16px;
+        background: #1f6feb;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 5px 4px 5px 0;
+      }
+      button.secondary {
+        background: #566573;
+      }
+      button.success {
+        background: #18864b;
+      }
+      .result {
+        background: #eef6ff;
+        border-left: 4px solid #1f6feb;
+        padding: 13px;
+        margin-top: 12px;
+        border-radius: 6px;
+      }
+      .error {
+        background: #fff5f5;
+        border-left: 4px solid #d33;
+        padding: 13px;
+        margin-top: 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 14px;
+      }
+      th,
+      td {
+        border: 1px solid #dfe4e8;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background: #eaf0f5;
+      }
+      .small {
+        font-size: 13px;
+        color: #5d6d7e;
+      }
+      .formula {
+        font-family: Consolas, monospace;
+        background: #f2f3f4;
+        padding: 10px;
+        border-radius: 6px;
+        overflow: auto;
+      }
+      .tabs button {
+        background: #566573;
+      }
+      .tabs button.active {
+        background: #1f6feb;
+      }
+      .tab {
+        display: none;
+      }
+      .tab.active {
+        display: block;
+      }
+      @media print {
+        button,
+        .tabs,
+        header p {
+          display: none;
+        }
+        .card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Desafío Integrador Financiero — Métodos Numéricos</h1>
+      <p>Duración sugerida: 90 minutos · Calculadora paso a paso</p>
+    </header>
+    <div class="container">
+      <div class="card">
+        <h2>📌 Desafío propuesto</h2>
+        <p>
+          Una empresa necesita analizar una inversión y distribuir una meta
+          financiera entre tres áreas. El estudiante debe calcular errores,
+          aproximar una función mediante Taylor y resolver un sistema de
+          ecuaciones lineales usando <b>LU, Jacobi y Gauss-Seidel</b>.
+        </p>
+        <h3>Distribución sugerida para 90 minutos</h3>
+        <table>
+          <tr>
+            <th>Parte</th>
+            <th>Actividad</th>
+            <th>Tiempo</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>Cálculo de errores absoluto, relativo y porcentual</td>
+            <td>15 min</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Aproximación por Taylor</td>
+            <td>20 min</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Sistema lineal por LU</td>
+            <td>20 min</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Jacobi y Gauss-Seidel</td>
+            <td>25 min</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Comparación y conclusión financiera</td>
+            <td>10 min</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="tabs card">
+        <button class="active" onclick="tab('errores', this)">
+          1. Errores
+        </button>
+        <button onclick="tab('taylor', this)">2. Taylor</button>
+        <button onclick="tab('sistemas', this)">3. Sistemas</button>
+        <button onclick="tab('iterativos', this)">4. Jacobi / Seidel</button>
+      </div>
+
+      <section id="errores" class="card tab active">
+        <h2>1. Cálculo de errores</h2>
+        <p class="small">Ingrese el valor verdadero y el valor aproximado.</p>
+        <div class="grid">
+          <label
+            >Valor verdadero<input
+              id="vreal"
+              type="number"
+              step="any"
+              value="125000"
+          /></label>
+          <label
+            >Valor aproximado<input
+              id="vaprox"
+              type="number"
+              step="any"
+              value="124500"
+          /></label>
+        </div>
+        <button onclick="errores()">Calcular errores</button>
+        <div id="rerr"></div>
+        <div
+          class="card"
+          style="
+            background: #fafbfc;
+            border: 1px solid #e1e6eb;
+            margin-top: 15px;
+          "
+        >
+          <h3>💼 Ejemplo financiero realista: proyección de ventas</h3>
+          <p>
+            Una empresa estima que sus ventas mensuales reales fueron
+            <b>Bs 125.000</b>, pero el modelo financiero había pronosticado
+            <b>Bs 124.500</b>.
+          </p>
+          <p>
+            <b>Interpretación:</b> el error absoluto indica cuánto se alejó la
+            predicción en bolivianos. El error relativo permite medir ese desvío
+            respecto al valor real y el porcentaje facilita comunicar la
+            precisión del modelo.
+          </p>
+          <p class="small">
+            <b>Decisión financiera:</b> si el porcentaje de error es pequeño, la
+            proyección puede considerarse razonablemente precisa; si es elevado,
+            conviene revisar los supuestos usados para presupuestar ventas.
+          </p>
+        </div>
+        <div class="formula">
+          Error absoluto = |valor verdadero − valor aproximado|<br />
+          Error relativo = Error absoluto / |valor verdadero|<br />
+          Error porcentual = Error relativo × 100
+        </div>
+      </section>
+
+      <section id="taylor" class="card tab">
+        <h2>2. Aproximación por Taylor</h2>
+        <p>
+          Ejemplo financiero: aproximar <b>ln(x)</b> alrededor de un punto a.
+          Puede cambiar x, a y el número de términos.
+        </p>
+        <div class="grid">
+          <label
+            >x<input id="tx" type="number" step="any" value="1.10"
+          /></label>
+          <label>a<input id="ta" type="number" step="any" value="1" /></label>
+          <label
+            >Número de términos<input
+              id="tn"
+              type="number"
+              min="1"
+              max="12"
+              value="5"
+          /></label>
+        </div>
+        <button onclick="taylor()">Calcular Taylor</button>
+        <div id="rtaylor"></div>
+        <div
+          class="card"
+          style="
+            background: #fafbfc;
+            border: 1px solid #e1e6eb;
+            margin-top: 15px;
+          "
+        >
+          <h3>💼 Ejemplo financiero realista: crecimiento de una inversión</h3>
+          <p>
+            Suponga que una inversión pasa de un capital base de
+            <b>Bs 1.000</b> a <b>Bs 1.100</b>. Para estudiar cambios pequeños
+            alrededor de una situación conocida, una función logarítmica puede
+            aproximarse mediante Taylor.
+          </p>
+          <p>
+            <b>Interpretación:</b> cada término adicional de Taylor mejora la
+            aproximación dentro de un rango adecuado. El error absoluto mostrado
+            permite evaluar cuánto se diferencia la aproximación del valor real.
+          </p>
+          <p class="small">
+            <b>Decisión financiera:</b> Taylor resulta útil cuando una función
+            financiera es complicada y se necesita una aproximación rápida, por
+            ejemplo para analizar variaciones pequeñas de rentabilidad,
+            crecimiento o tasas.
+          </p>
+        </div>
+      </section>
+
+      <section id="sistemas" class="card tab">
+        <h2>3. Sistema lineal — LU</h2>
+        <p>Ingrese una matriz 3×3 y el vector de términos independientes.</p>
+        <div id="matrixInputs"></div>
+        <button onclick="solveLU()">Resolver por LU</button>
+        <div id="rlu"></div>
+        <div
+          class="card"
+          style="
+            background: #fafbfc;
+            border: 1px solid #e1e6eb;
+            margin-top: 15px;
+          "
+        >
+          <h3>💼 Ejemplo financiero realista: distribución de recursos</h3>
+          <p>
+            Una empresa tiene tres áreas que dependen entre sí:
+            <b>Marketing, Operaciones y Ventas</b>. Las ecuaciones representan
+            metas de recursos, costos o ingresos donde una variable puede
+            influir sobre las demás.
+          </p>
+          <p>Por ejemplo, el sistema puede representar:</p>
+          <div class="formula">
+            10x₁ + 2x₂ + x₃ = 14<br />
+            2x₁ + 10x₂ + 2x₃ = 18<br />
+            x₁ + 2x₂ + 10x₃ = 20
+          </div>
+          <p>
+            <b>Interpretación:</b> LU descompone el sistema en dos sistemas más
+            sencillos: <b>L·y=b</b> y <b>U·x=y</b>. Los valores finales de x₁,
+            x₂ y x₃ representan la solución simultánea de las tres restricciones
+            financieras.
+          </p>
+          <p class="small">
+            <b>Decisión financiera:</b> la solución ayuda a determinar cuánto
+            asignar a cada área respetando simultáneamente todas las relaciones
+            planteadas.
+          </p>
+        </div>
+      </section>
+
+      <section id="iterativos" class="card tab">
+        <h2>4. Métodos iterativos — Jacobi y Gauss-Seidel</h2>
+        <p class="small">
+          Use una matriz diagonalmente dominante para favorecer la convergencia.
+          La página muestra todas las iteraciones.
+        </p>
+        <div class="grid">
+          <label
+            >Tolerancia<input
+              id="tol"
+              type="number"
+              step="any"
+              value="0.000001"
+          /></label>
+          <label
+            >Máximo de iteraciones<input
+              id="maxit"
+              type="number"
+              min="1"
+              value="50"
+          /></label>
+        </div>
+        <div id="matrixInputs2"></div>
+        <button onclick="solveIter()">Calcular Jacobi y Gauss-Seidel</button>
+        <div id="riter"></div>
+        <div
+          class="card"
+          style="
+            background: #fafbfc;
+            border: 1px solid #e1e6eb;
+            margin-top: 15px;
+          "
+        >
+          <h3>💼 Ejemplo financiero realista: ajuste de un presupuesto</h3>
+          <p>
+            Las tres variables pueden representar el presupuesto destinado a
+            <b>publicidad, logística y ventas</b>. Como cada área está
+            relacionada con las otras, resolver el sistema permite encontrar
+            valores compatibles con las metas financieras.
+          </p>
+          <p>
+            <b>Jacobi:</b> calcula una nueva aproximación usando principalmente
+            los valores de la iteración anterior.
+          </p>
+          <p>
+            <b>Gauss-Seidel:</b> aprovecha inmediatamente los valores nuevos
+            calculados dentro de la misma iteración. Por eso, cuando el sistema
+            converge adecuadamente, suele necesitar menos iteraciones.
+          </p>
+          <p>
+            <b>Interpretación:</b> la tolerancia indica qué tan pequeña debe ser
+            la variación entre iteraciones para considerar que la solución es
+            suficientemente estable.
+          </p>
+          <p class="small">
+            <b>Decisión financiera:</b> comparar ambos métodos permite elegir
+            una técnica eficiente para automatizar cálculos de planificación y
+            asignación de recursos.
+          </p>
+        </div>
+      </section>
+
+      <div class="card">
+        <h2>📊 Conclusión integradora de los ejemplos financieros</h2>
+        <p>
+          Los métodos numéricos permiten tomar decisiones financieras aun cuando
+          los cálculos exactos sean difíciles o cuando existan múltiples
+          variables relacionadas. El <b>cálculo de errores</b> permite medir la
+          confiabilidad de una estimación; la
+          <b>aproximación de Taylor</b> permite sustituir una función por una
+          aproximación más sencilla; y los métodos
+          <b>LU, Jacobi y Gauss-Seidel</b> permiten resolver sistemas donde
+          varias decisiones financieras están relacionadas simultáneamente.
+        </p>
+        <p>
+          En el ejemplo de proyección de ventas, el error permite saber si el
+          pronóstico es suficientemente confiable. En el ejemplo de Taylor, el
+          error muestra si la aproximación es adecuada para el análisis
+          financiero. Finalmente, en la distribución de recursos, los tres
+          métodos buscan la misma solución matemática, aunque los métodos
+          iterativos pueden requerir diferentes cantidades de iteraciones.
+        </p>
+        <p>
+          <b>Conclusión:</b> una solución numérica no debe analizarse únicamente
+          por el valor obtenido. También es necesario conocer su error,
+          verificar su convergencia y explicar qué representa el resultado
+          dentro del problema financiero. De esta manera, los métodos numéricos
+          se convierten en herramientas para respaldar decisiones de
+          presupuesto, inversión, proyección y asignación de recursos.
+        </p>
+        <button class="success" onclick="window.print()">
+          Imprimir / Guardar en PDF
+        </button>
+        <button class="secondary" onclick="location.reload()">
+          Restablecer
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function tab(id, btn) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((x) => x.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document
+          .querySelectorAll(".tabs button")
+          .forEach((x) => x.classList.remove("active"));
+        btn.classList.add("active");
+      }
+
+      function errores() {
+        let v = +vreal.value,
+          a = +vaprox.value,
+          ea = Math.abs(v - a),
+          er = ea / Math.abs(v),
+          ep = er * 100;
+        rerr.innerHTML = `<div class="result"><b>Error absoluto:</b> ${ea.toFixed(8)}<br><b>Error relativo:</b> ${er.toFixed(10)}<br><b>Error porcentual:</b> ${ep.toFixed(6)}%</div>`;
+      }
+      function taylor() {
+        let x = +tx.value,
+          a = +ta.value,
+          n = +tn.value;
+        if (x <= 0 || a <= 0) {
+          rtaylor.innerHTML =
+            '<div class="error">Para ln(x), x y a deben ser mayores que 0.</div>';
+          return;
+        }
+        let z = (x - a) / a,
+          sum = 0,
+          rows = "";
+        for (let k = 1; k <= n; k++) {
+          let term = (Math.pow(-1, k + 1) * Math.pow(z, k)) / k;
+          sum += term;
+          rows += `<tr><td>${k}</td><td>${term.toFixed(12)}</td><td>${sum.toFixed(12)}</td></tr>`;
+        }
+        let real = Math.log(x),
+          err = Math.abs(real - sum);
+        rtaylor.innerHTML = `<div class="result"><b>Aproximación:</b> ${sum.toFixed(12)}<br><b>Valor real ln(x):</b> ${real.toFixed(12)}<br><b>Error absoluto:</b> ${err.toExponential(6)}</div>
+ <table><tr><th>Término</th><th>Término calculado</th><th>Suma parcial</th></tr>${rows}</table>`;
+      }
+      const defaultA = [
+          [10, 2, 1],
+          [2, 10, 2],
+          [1, 2, 10],
+        ],
+        defaultB = [14, 18, 20];
+      function makeInputs(id) {
+        let html =
+          "<table><tr><th></th><th>x₁</th><th>x₂</th><th>x₃</th><th>b</th></tr>";
+        for (let i = 0; i < 3; i++) {
+          html += `<tr><th>Ecuación ${i + 1}</th>`;
+          for (let j = 0; j < 3; j++)
+            html += `<td><input id="${id}a${i}${j}" type="number" step="any" value="${defaultA[i][j]}"></td>`;
+          html += `<td><input id="${id}b${i}" type="number" step="any" value="${defaultB[i]}"></td></tr>`;
+        }
+        return html + "</table>";
+      }
+      matrixInputs.innerHTML = makeInputs("m");
+      matrixInputs2.innerHTML = makeInputs("q");
+      function readM(id) {
+        let A = [],
+          b = [];
+        for (let i = 0; i < 3; i++) {
+          A[i] = [];
+          for (let j = 0; j < 3; j++)
+            A[i][j] = +document.getElementById(id + "a" + i + j).value;
+          b[i] = +document.getElementById(id + "b" + i).value;
+        }
+        return [A, b];
+      }
+      function fmt(x) {
+        return Number(x).toFixed(8);
+      }
+      function solveLU() {
+        let [A, b] = readM("m"),
+          n = 3,
+          L = Array.from({ length: n }, () => Array(n).fill(0)),
+          U = Array.from({ length: n }, () => Array(n).fill(0));
+        for (let i = 0; i < n; i++) L[i][i] = 1;
+        for (let k = 0; k < n; k++) {
+          for (let j = k; j < n; j++) {
+            let s = 0;
+            for (let p = 0; p < k; p++) s += L[k][p] * U[p][j];
+            U[k][j] = A[k][j] - s;
+          }
+          for (let i = k + 1; i < n; i++) {
+            let s = 0;
+            for (let p = 0; p < k; p++) s += L[i][p] * U[p][k];
+            if (Math.abs(U[k][k]) < 1e-12) {
+              rlu.innerHTML =
+                '<div class="error">No se puede aplicar esta factorización LU sin pivoteo.</div>';
+              return;
+            }
+            L[i][k] = (A[i][k] - s) / U[k][k];
+          }
+        }
+        let y = [],
+          x = [];
+        for (let i = 0; i < n; i++) {
+          let s = 0;
+          for (let j = 0; j < i; j++) s += L[i][j] * y[j];
+          y[i] = b[i] - s;
+        }
+        for (let i = n - 1; i >= 0; i--) {
+          let s = 0;
+          for (let j = i + 1; j < n; j++) s += U[i][j] * x[j];
+          x[i] = (y[i] - s) / U[i][i];
+        }
+        let mat = (t) =>
+          "<table>" +
+          t
+            .map(
+              (r) =>
+                "<tr>" + r.map((v) => `<td>${fmt(v)}</td>`).join("") + "</tr>",
+            )
+            .join("") +
+          "</table>";
+        rlu.innerHTML = `<div class="result"><b>Solución por LU:</b> x₁=${fmt(x[0])}, x₂=${fmt(x[1])}, x₃=${fmt(x[2])}</div>
+ <h3>Matriz L</h3>${mat(L)}<h3>Matriz U</h3>${mat(U)}
+ <h3>Vector y (L·y=b)</h3><div class="formula">[${y.map(fmt).join(", ")}]</div>`;
+      }
+      function iter(A, b, method, tol, maxit) {
+        let x = [0, 0, 0],
+          rows = "";
+        for (let k = 1; k <= maxit; k++) {
+          let old = x.slice(),
+            nx = [];
+          for (let i = 0; i < 3; i++) {
+            let s = 0;
+            for (let j = 0; j < 3; j++)
+              if (j !== i)
+                s += A[i][j] * (method === "J" ? old[j] : (nx[j] ?? old[j]));
+            nx[i] = (b[i] - s) / A[i][i];
+          }
+          let e = Math.max(...nx.map((v, i) => Math.abs(v - old[i])));
+          x = nx;
+          rows += `<tr><td>${k}</td>${x.map((v) => `<td>${fmt(v)}</td>`).join("")}<td>${e.toExponential(4)}</td></tr>`;
+          if (e < tol) return { x, k, rows };
+        }
+        return { x, k: maxit, rows };
+      }
+      function solveIter() {
+        let [A, b] = readM("q");
+        if (A.some((r, i) => Math.abs(r[i]) < 1e-12)) {
+          riter.innerHTML =
+            '<div class="error">No hay ceros permitidos en la diagonal principal.</div>';
+          return;
+        }
+        let tol = +document.getElementById("tol").value,
+          maxit = +document.getElementById("maxit").value;
+        let j = iter(A, b, "J", tol, maxit),
+          s = iter(A, b, "S", tol, maxit);
+        function table(o) {
+          return `<table><tr><th>Iter.</th><th>x₁</th><th>x₂</th><th>x₃</th><th>Error máx.</th></tr>${o.rows}</table>`;
+        }
+        riter.innerHTML = `<div class="result"><b>Jacobi:</b> ${j.k <= maxit ? "convergió" : "llegó al máximo de iteraciones"} en ${j.k} iteraciones → x=[${j.x.map(fmt).join(", ")}]<br>
+ <b>Gauss-Seidel:</b> ${s.k <= maxit ? "convergió" : "llegó al máximo de iteraciones"} en ${s.k} iteraciones → x=[${s.x.map(fmt).join(", ")}]</div>
+ <h3>Iteraciones de Jacobi</h3>${table(j)}<h3>Iteraciones de Gauss-Seidel</h3>${table(s)}`;
+      }
+      errores();
+      taylor();
+      solveLU();
+      solveIter();
+    </script>
+  </body>
+</html>
